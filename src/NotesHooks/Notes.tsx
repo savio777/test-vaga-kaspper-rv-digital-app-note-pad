@@ -1,13 +1,22 @@
-import {useEffect} from 'react';
-import React, {createContext, useCallback, useContext, useState} from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  useEffect,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Notes from '../interfaces/INotes';
+import randomId from '../utils/randomId';
 
 interface NotesContextData {
   notes: Notes[];
   loading: boolean;
   addNote(note: Notes): Promise<void>;
+  getNote(id: string | null | undefined): Notes | undefined;
+  deleteNote(id: string | null | undefined): Promise<void>;
+  editNote(note: Notes): Promise<void>;
   clean(): void;
 }
 
@@ -16,12 +25,14 @@ const NotesContext = createContext<NotesContextData>({} as NotesContextData);
 const textLoremIpsum =
   "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
 
+const dataMockup = [
+  {id: randomId(), text: 'teste', title: 'titulo'},
+  {id: randomId(), text: 'teste1', title: 'titulo1'},
+  {id: randomId(), text: textLoremIpsum, title: 'titulo2'},
+];
+
 export const NotesProvider: React.FC = ({children}) => {
-  const [data, setData] = useState<Notes[]>([
-    {text: 'teste', title: 'titulo'},
-    {text: 'teste1', title: 'titulo1'},
-    {text: textLoremIpsum, title: 'titulo2'},
-  ]);
+  const [data, setData] = useState<Notes[]>(dataMockup);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,7 +55,7 @@ export const NotesProvider: React.FC = ({children}) => {
   const addNote = useCallback(
     async ({title, text}: Notes) => {
       if (title && text) {
-        const newData: Notes[] = [...data, {title, text}];
+        const newData: Notes[] = [...data, {id: randomId(), title, text}];
 
         setData(newData);
         await AsyncStorage.setItem('@NotePad:notes', JSON.stringify(newData));
@@ -59,8 +70,56 @@ export const NotesProvider: React.FC = ({children}) => {
     setData([]);
   }, []);
 
+  const deleteNote = useCallback(
+    async (id: string) => {
+      if (id) {
+        const newData = data.filter(note => note.id !== id);
+        setData(newData);
+      }
+    },
+    [data],
+  );
+
+  const editNote = useCallback(
+    async (notesParam: Notes) => {
+      const {id, text, title} = notesParam;
+      if (id) {
+        const idFind = data.findIndex(note => note.id === id);
+
+        if ((idFind === 0 || idFind > 0) && text && title) {
+          const newData = data;
+          newData[idFind].text = text;
+          newData[idFind].title = title;
+
+          setData([...newData]);
+        }
+      }
+    },
+    [data],
+  );
+
+  const getNote = useCallback(
+    (id: string) => {
+      if (id) {
+        const idFind = data.findIndex(note => note.id === id);
+
+        return data[idFind];
+      }
+    },
+    [data],
+  );
+
   return (
-    <NotesContext.Provider value={{notes: data, addNote, clean, loading}}>
+    <NotesContext.Provider
+      value={{
+        notes: data,
+        addNote,
+        clean,
+        loading,
+        deleteNote,
+        editNote,
+        getNote,
+      }}>
       {children}
     </NotesContext.Provider>
   );

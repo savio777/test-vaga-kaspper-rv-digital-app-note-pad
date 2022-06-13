@@ -1,6 +1,7 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
+import {Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 import {ButtonCircle} from '../../components';
 import {useNotes} from '../../NotesHooks/Notes';
@@ -14,13 +15,30 @@ import {
 } from './styles';
 
 export default () => {
-  const {notes, addNote} = useNotes();
+  const {addNote, deleteNote, editNote, getNote} = useNotes();
   const {goBack} = useNavigation();
+  const {params} = useRoute();
 
+  const [id, setId] = useState<null | string | undefined>(null);
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
 
   const refTextRefInput = useRef(null);
+
+  useEffect(() => {
+    const {id: idParam}: {id: string | null | undefined} = params;
+
+    if (idParam) {
+      setId(idParam);
+      const note = getNote(idParam);
+      if (note?.text) {
+        setText(note?.text);
+      }
+      if (note?.title) {
+        setTitle(note?.title);
+      }
+    }
+  }, [params, getNote]);
 
   return (
     <Container>
@@ -44,8 +62,30 @@ export default () => {
       </Content>
       <ContainerButtons>
         <ButtonCircle
+          onPress={() =>
+            Alert.alert('Aviso', 'Deseja realmente apagar a nota?', [
+              {
+                text: 'Cancelar',
+                onPress: () => {},
+              },
+              {
+                text: 'Confirmar',
+                onPress: () => {
+                  deleteNote(id);
+                  goBack();
+                },
+              },
+            ])
+          }>
+          <Icon name="delete-outline" size={25} color="white" />
+        </ButtonCircle>
+        <ButtonCircle
           onPress={() => {
-            addNote({text, title});
+            if (id) {
+              editNote({text, title, id});
+            } else {
+              addNote({text, title});
+            }
             goBack();
           }}>
           <Icon name="content-save-outline" size={25} color="white" />

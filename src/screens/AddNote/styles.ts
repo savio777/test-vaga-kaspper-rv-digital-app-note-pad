@@ -24,5 +24,5 @@ export const TitleInput = styled.TextInput`
 `;
 
 export const TextInput = styled.TextInput`
-  max-height: 80%;
+  max-height: 90%;
 `;

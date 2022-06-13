@@ -16,7 +16,13 @@ export default () => {
       <FlatList
         keyExtractor={(_, index) => String(index)}
         data={notes}
-        renderItem={({item}) => <Notes title={item.title} text={item.text} />}
+        renderItem={({item}) => (
+          <Notes
+            title={item.title}
+            text={item.text}
+            onLongPress={() => navigate('AddNote', {id: item.id})}
+          />
+        )}
         numColumns={2}
         // style={{borderWidth: 1, borderColor: 'red'}}
       />
