@@ -1,6 +1,7 @@
 import React from 'react';
 import {FlatList, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useNavigation} from '@react-navigation/native';
 
 import {Container, ContainerButtons} from './styles';
 import {useNotes} from '../../NotesHooks/Notes';
@@ -8,6 +9,7 @@ import {Notes, ButtonCircle} from '../../components';
 
 export default () => {
   const {notes, clean} = useNotes();
+  const {navigate} = useNavigation();
 
   return (
     <Container>
@@ -28,7 +30,7 @@ export default () => {
           }>
           <Icon name="delete-outline" size={25} color="white" />
         </ButtonCircle>
-        <ButtonCircle>
+        <ButtonCircle onPress={() => navigate('AddNote')}>
           <Icon name="pencil" size={25} color="white" />
         </ButtonCircle>
       </ContainerButtons>
