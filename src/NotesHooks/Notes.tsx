@@ -6,12 +6,15 @@ import React, {
   useEffect,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Geolocation from '@react-native-community/geolocation';
 
 import Notes from '../interfaces/INotes';
 import randomId from '../utils/randomId';
+import IGeolocation from '../interfaces/IGeolocation';
 
 interface NotesContextData {
   notes: Notes[];
+  location: IGeolocation;
   loading: boolean;
   addNote(note: Notes): Promise<void>;
   getNote(id: string | null | undefined): Notes | undefined;
@@ -37,6 +40,10 @@ const dataMockup = [
 
 export const NotesProvider: React.FC = ({children}) => {
   const [data, setData] = useState<Notes[]>(dataMockup);
+  const [location, setLocation] = useState<IGeolocation>({
+    latitude: undefined,
+    longitude: undefined,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,6 +62,20 @@ export const NotesProvider: React.FC = ({children}) => {
 
     loadStorageData();
   }, []);
+
+  useEffect(() => {
+    Geolocation.getCurrentPosition(
+      position => {
+        console.log(position);
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      err => console.log('err location', err),
+      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+    );
+  }, [data]);
 
   const addNote = useCallback(
     async ({title, text}: Notes) => {
@@ -123,6 +144,7 @@ export const NotesProvider: React.FC = ({children}) => {
         deleteNote,
         editNote,
         getNote,
+        location,
       }}>
       {children}
     </NotesContext.Provider>
