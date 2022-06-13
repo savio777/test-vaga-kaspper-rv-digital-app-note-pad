@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text} from 'react-native';
+import {FlatList} from 'react-native';
 
 import {Container} from './styles';
 import {useNotes} from '../../NotesHooks/Notes';
@@ -10,10 +10,12 @@ export default () => {
 
   return (
     <Container>
-      <Text>oi</Text>
-      {notes.map((note, index) => (
-        <Notes key={String(index)} text={note.text} title={note.title} />
-      ))}
+      <FlatList
+        keyExtractor={(_, index) => String(index)}
+        data={notes}
+        renderItem={({item}) => <Notes title={item.title} text={item.text} />}
+        numColumns={2}
+      />
     </Container>
   );
 };

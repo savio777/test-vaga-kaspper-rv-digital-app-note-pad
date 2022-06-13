@@ -1,10 +1,22 @@
 import styled from 'styled-components/native';
 
-export const Container = styled.View`
-  background-color: #ccc;
-  border-radius: 8px;
+export const Container = styled.TouchableOpacity`
+  width: 50%;
+  padding: 5px;
 `;
 
-export const Title = styled.Text``;
+export const Content = styled.View`
+  background-color: #575757;
+  min-height: 50px;
+  border-radius: 8px;
+  padding: 5px;
+`;
 
-export const Text = styled.Text``;
+export const Text = styled.Text`
+  color: #fff;
+`;
+
+export const Title = styled(Text)`
+  font-weight: bold;
+  font-size: 20px;
+`;
